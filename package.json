@@ -2,6 +2,7 @@
   "name": "AlphaSPA",
   "version": "1.0.0",
   "devDependencies": {
-    "esbuild": "^0.19.9"
+    "esbuild": "^0.19.9",
+    "eslint": "^10.2.0"
   }
 }
