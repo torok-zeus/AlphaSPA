@@ -29,6 +29,7 @@ module Client =
             let label =
                 spotVar.View.Map (function
                     | Some plate -> name + "-" + plate
+                    | None -> name
                 )
             button [
                 attr.styleDyn(
