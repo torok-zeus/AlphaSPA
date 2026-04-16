@@ -11,7 +11,7 @@ function Main(){
     const _3=_2[0];
     const spotVar=_2[1];
     const isOccupied=Map_1((o) => o!=null, spotVar.View);
-    const label=Map_1((a) => a==null?_3+" - empty":_3+"-"+a.$0, spotVar.View);
+    const label=Map_1((a) => a==null?_3:_3+"-"+a.$0, spotVar.View);
     return Doc.Element("button", [Dynamic("style", Map_1((occ) => occ?"margin:5px; padding:15px; background-color:red; color:white; border none;":"margin:5px; padding:15px; background-color:green; color:white; border none;", isOccupied)), Attr.HandlerImpl("click", () =>() => {
       const _4=spotVar.Get();
       const _5=plateVar.Get();
