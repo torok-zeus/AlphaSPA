@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
 
 jobs:
   build-deploy:
@@ -22,13 +22,13 @@ jobs:
 
     - name: Prepare publish folder
       run: |
-        rm -rf public
-        mkdir public
-        cp index.html public/
+        mkdir -p public
         cp -r wwwroot public/
+        cp index.html public/
 
-    - name: Deploy to GitHub Pages
+    - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./public
+        force_orphan: true
