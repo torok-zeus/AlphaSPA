@@ -30,13 +30,8 @@ function Main(){
       return _4==null?_5!=""?(spotVar.Set(Some(New(_5, Date.now()))),plateVar.Set("")):null:null;
     })], [Doc.TextView(label)]);
   }, spots))]);
-  const _1=Doc.Element("div", [], [Doc.Element("button", [Attr.Create("style", "position:fixed; top:10px; left:10px; z-index:1000; font-size:20px;"), Attr.HandlerImpl("click", () =>() => menuOpen.Set(!menuOpen.Get()))], [Doc.TextNode("///")]), Doc.Element("div", [Dynamic("style", Map_1((isOpen) => isOpen?"position:fixed; top:0; left:0; width:200px; height:100%; background:#333; color:white; padding:20px;":"display:none;", menuOpen.View))], [Doc.Element("h4", [], [Doc.TextNode("Menu")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => {
-    currentPage.Set(Parking);
-    return menuOpen.Set(false);
-  })], [Doc.TextNode("Parking")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => {
-    currentPage.Set(Payment);
-    return menuOpen.Set(false);
-  })], [Doc.TextNode("Payment")])]), Doc.BindView((x) => x, Map_1((a) => a.$==1?paymentView:parkingView, currentPage.View))]);
+  const mainView=Map_1((a) => a.$==1?paymentView:parkingView, currentPage.View);
+  const _1=Doc.Element("div", [], [Doc.Element("div", [Attr.Create("style", "\r\n                    position:fixed;\r\n                    top:0;\r\n                    left:0;\r\n                    width:100%;\r\n                    height:50px;\r\n                    background:#222;\r\n                    color:white;\r\n                    display:flex;\r\n                    align-items:center;\r\n                    padding:0 10px;\r\n                    z-index:3000;\r\n                ")], [Doc.Element("button", [Attr.Create("style", "font-size:20px; background:none; border:none; color:white; cursor:pointer;"), Attr.HandlerImpl("click", () =>() => menuOpen.Set(!menuOpen.Get()))], [Doc.TextNode("///")]), Doc.Element("div", [Attr.Create("style", "margin:10px")], [Doc.TextNode("Parking App")])]), Doc.Element("div", [Attr.Create("style", "display:flex; margin-top:50px; height:calc(100vh - 50px);")], [Doc.Element("div", [Dynamic("style", Map_1((isOpen) => isOpen?"width:200px; background:#333; color:white; padding:10px; transition:0.3s;":"width:0px; overflow:hidden; transition:0.3s;", menuOpen.View))], [Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => currentPage.Set(Parking))], [Doc.TextNode("Parking")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => currentPage.Set(Payment))], [Doc.TextNode("Payment")])]), Doc.Element("div", [Attr.Create("style", "flex:1; padding:10px;")], [Doc.BindView((x) => x, mainView)])]), Doc.BindView((x) => x, mainView)]);
   LoadLocalTemplates("");
   Doc.RunById("main", _1);
 }
@@ -550,6 +545,47 @@ class FSharpList {
   $0;
   $1;
 }
+function Map_1(fn, a){
+  return CreateLazy(() => Map(fn, a()));
+}
+function CreateLazy(observe){
+  const lv={c:null, o:observe};
+  return() => {
+    let c=lv.c;
+    if(c===null){
+      c=lv.o();
+      lv.c=c;
+      const _1=c.s;
+      if(_1!=null&&_1.$==0)lv.o=null;
+      else WhenObsoleteRun(c, () => {
+        lv.c=null;
+      });
+      return c;
+    }
+    else return c;
+  };
+}
+function Const(x){
+  const o={s:Forever(x)};
+  return() => o;
+}
+function Bind(fn, view){
+  return Join_1(Map_1(fn, view));
+}
+function Join_1(a){
+  return CreateLazy(() => Join(a()));
+}
+function Sink(act, a){
+  function loop(){
+    WhenRun(a(), act, () => {
+      scheduler().Fork(loop);
+    });
+  }
+  scheduler().Fork(loop);
+}
+function Map2Unit_1(a, a_1){
+  return CreateLazy(() => Map2Unit(a(), a_1()));
+}
 class Doc extends Object_1 {
   docNode;
   updates;
@@ -906,60 +942,6 @@ function PrepareSingleTemplate(baseName, name, el){
 function TextHoleRE(){
   return _c_1.TextHoleRE;
 }
-function Map_1(fn, a){
-  return CreateLazy(() => Map(fn, a()));
-}
-function CreateLazy(observe){
-  const lv={c:null, o:observe};
-  return() => {
-    let c=lv.c;
-    if(c===null){
-      c=lv.o();
-      lv.c=c;
-      const _1=c.s;
-      if(_1!=null&&_1.$==0)lv.o=null;
-      else WhenObsoleteRun(c, () => {
-        lv.c=null;
-      });
-      return c;
-    }
-    else return c;
-  };
-}
-function Const(x){
-  const o={s:Forever(x)};
-  return() => o;
-}
-function Bind(fn, view){
-  return Join_1(Map_1(fn, view));
-}
-function Join_1(a){
-  return CreateLazy(() => Join(a()));
-}
-function Sink(act, a){
-  function loop(){
-    WhenRun(a(), act, () => {
-      scheduler().Fork(loop);
-    });
-  }
-  scheduler().Fork(loop);
-}
-function Map2Unit_1(a, a_1){
-  return CreateLazy(() => Map2Unit(a(), a_1()));
-}
-function Dynamic(name, view){
-  return Dynamic_1(view, (el) =>(v) => el.setAttribute(name, v));
-}
-function Value(var_1){
-  return ValueWith(StringApply(), var_1);
-}
-function ValueWith(bind, var_1){
-  const p=bind(var_1);
-  return AppendTree(Attr.A3(p[0]), DynamicCustom(p[1], p[2]));
-}
-function DynamicCustom(set_1, view){
-  return Dynamic_1(view, set_1);
-}
 class Attr {
   static Create(name, value){
     return Attr.A3((el) => {
@@ -975,11 +957,11 @@ class Attr {
     const x=ofSeqNonCopying(xs);
     return TreeReduce(EmptyAttr(), (_1, _2) => AppendTree(_1, _2), x);
   }
-  static A1(Item){
-    return Create_1(Attr, {$:1, $0:Item});
-  }
   static A3(init_2){
     return Create_1(Attr, {$:3, $0:init_2});
+  }
+  static A1(Item){
+    return Create_1(Attr, {$:1, $0:Item});
   }
   static A2(Item1, Item2){
     return Create_1(Attr, {
@@ -991,6 +973,19 @@ class Attr {
   $;
   $0;
   $1;
+}
+function Dynamic(name, view){
+  return Dynamic_1(view, (el) =>(v) => el.setAttribute(name, v));
+}
+function Value(var_1){
+  return ValueWith(StringApply(), var_1);
+}
+function ValueWith(bind, var_1){
+  const p=bind(var_1);
+  return AppendTree(Attr.A3(p[0]), DynamicCustom(p[1], p[2]));
+}
+function DynamicCustom(set_1, view){
+  return Dynamic_1(view, set_1);
 }
 function Int(){
   set_counter(counter()+1);
@@ -2866,6 +2861,9 @@ class CheckedInput {
   $0;
   $1;
 }
+function Clear(a){
+  a.splice(0, length(a));
+}
 let _c_5=Lazy((_i) => class $StartupCode_DomUtility {
   static {
     _c_5=_i(this);
@@ -2932,9 +2930,6 @@ function Concat_1(xs){
 }
 function Empty(){
   return _c_8.Empty;
-}
-function Clear(a){
-  a.splice(0, length(a));
 }
 function IsWhiteSpace(c){
   return c.match(new RegExp("\\s"))!==null;
