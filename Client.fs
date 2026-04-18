@@ -101,75 +101,76 @@ module Client =
 
                 div [] (spots |> List.map renderSpot)
             ]
-        let hamburger =
-            button[
-                attr.style "position:fixed; top:10px; left:10px; z-index:1000; font-size:20px;"
-                on.click (fun _ _ -> menuOpen.Value <- not menuOpen.Value)
-            ] [
-                text "///"
-            ]
-
-        let sidebar =
-            div [
-                attr.styleDyn (
-                    menuOpen.View.Map (fun isOpen ->
-                        let x =
-                            if isOpen then "0px"
-                            else "-" + string sidebarWidth + "px"
-
-                        "position:fixed;
-                          top:0;
-                          left:{x}
-                          width:{sidebarWidth}px
-                          height:100%
-                          background:#333
-                          color:white;
-                          padding:20px;
-                          transition:left 0.3s ease;
-                          z-index:1500;"
-                    )
-                )   
-            ] [
-                h4 [] [ text "Menu"]
-
-                button [
-                    attr.style "display:block; margin:10px 0;"
-                    on.click (fun _ _ ->
-                        currentPage.Value <- Parking
-                        menuOpen.Value <- false
-                    )
-                ] [ text "Parking"]
-
-                button [
-                    attr.style "display:block; margin:10px 0;"
-                    on.click (fun _ _ ->
-                        currentPage.Value <- Payment
-                        menuOpen.Value <- false
-                    )
-                ] [text "Payment"]
-            ]
 
         let mainView =
             currentPage.View.Map (function
                 | Parking -> parkingView
                 | Payment -> paymentView
             )
-        let mainContainer = 
+        let topBar =
             div [
-                attr.styleDyn (
-                     menuOpen.View.Map (fun isOpen ->
-                        if isOpen then
-                            $"margin-left:{sidebarWidth}px; transition:margin-left 0.3s ease;"
-                        else
-                            "margin-left:0px; transition:margin-left 0.3s ease;"
-                    )
-                )
+                attr.style "
+                    position:fixed;
+                    top:0;
+                    left:0;
+                    width:100%;
+                    height:50px;
+                    background:#222;
+                    color:white;
+                    display:flex;
+                    align-items:center;
+                    padding:0 10px;
+                    z-index:3000;
+                "
             ] [
-                Doc.BindView id mainView
+                button [
+                    attr.style "font-size:20px; background:none; border:none; color:white; cursor:pointer;"
+                    on.click (fun _ _ -> menuOpen.Value <- not menuOpen.Value)
+                ] [ text "///"]
+                div [attr.style "margin:10px"] [
+                    text "Parking App"
+                ]
             ]
+        let layout =
+            div [
+                attr.style "display:flex; margin-top:50px; height:calc(100vh - 50px);"
+            ] [
+                div [
+                    attr.styleDyn (
+                        menuOpen.View.Map (fun isOpen ->
+                            if isOpen then
+                                 "width:200px; background:#333; color:white; padding:10px; transition:0.3s;"
+                            else
+                                 "width:0px; overflow:hidden; transition:0.3s;"                               
+                        )
+                    )
+                ] [
+                    button [
+                        attr.style "display:block; margin:10px 0;"
+                        on.click (fun _ _ ->
+                            currentPage.Value <- Parking
+                        )
+                    ] [ text "Parking"]
+                    
+                    button [
+                        attr.style "display:block; margin:10px 0;"
+                        on.click (fun _ _ ->
+                            currentPage.Value <- Payment
+                        )
+                    ] [ text "Payment"]
+                 
+                ]
+                div [
+                     attr.style "flex:1; padding:10px;"
+                ] [
+                     Doc.BindView id mainView
+                ]
+            ]
+
+        
         div [] [
-            hamburger
-            sidebar
+            topBar
+            layout
             Doc.BindView id mainView
         ]
         |> Doc.RunById "main"
