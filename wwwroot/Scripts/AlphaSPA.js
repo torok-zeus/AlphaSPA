@@ -7,6 +7,7 @@ function isIDisposable(x){
 function Main(){
   const currentPage=_c.Create_1(Parking);
   const plateVar=_c.Create_1("");
+  const menuOpen=_c.Create_1(false);
   const spots=map_1((i) =>["A"+String(i), _c.Create_1(null)], ofSeq(range(1, 10)));
   const paymentView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Payment")]), Doc.Element("div", [], map_1((_2) => {
     const name=_2[0];
@@ -29,7 +30,13 @@ function Main(){
       return _4==null?_5!=""?(spotVar.Set(Some(New(_5, Date.now()))),plateVar.Set("")):null:null;
     })], [Doc.TextView(label)]);
   }, spots))]);
-  const _1=Doc.Element("div", [], [Doc.Element("div", [Attr.Create("style", "margin-bottom:20px;")], [Doc.Element("button", [Attr.HandlerImpl("click", () =>() => currentPage.Set(Parking))], [Doc.TextNode("Parking")]), Doc.Element("button", [Attr.HandlerImpl("click", () =>() => currentPage.Set(Payment))], [Doc.TextNode("Payment")])]), Doc.BindView((x) => x, Map_1((a) => a.$==1?paymentView:parkingView, currentPage.View))]);
+  const _1=Doc.Element("div", [], [Doc.Element("button", [Attr.Create("style", "position:fixed; top:10px; left:10px; z-index:1000; font-size:20px;"), Attr.HandlerImpl("click", () =>() => menuOpen.Set(!menuOpen.Get()))], [Doc.TextNode("///")]), Doc.Element("div", [Dynamic("style", Map_1((isOpen) => isOpen?"position:fixed; top:0; left:0; width:200px; height:100%; background:#333; color:white; padding:20px;":"display:none;", menuOpen.View))], [Doc.Element("h4", [], [Doc.TextNode("Menu")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => {
+    currentPage.Set(Parking);
+    return menuOpen.Set(false);
+  })], [Doc.TextNode("Parking")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => {
+    currentPage.Set(Payment);
+    return menuOpen.Set(false);
+  })], [Doc.TextNode("Payment")])]), Doc.BindView((x) => x, Map_1((a) => a.$==1?paymentView:parkingView, currentPage.View))]);
   LoadLocalTemplates("");
   Doc.RunById("main", _1);
 }
@@ -940,6 +947,19 @@ function Sink(act, a){
 function Map2Unit_1(a, a_1){
   return CreateLazy(() => Map2Unit(a(), a_1()));
 }
+function Dynamic(name, view){
+  return Dynamic_1(view, (el) =>(v) => el.setAttribute(name, v));
+}
+function Value(var_1){
+  return ValueWith(StringApply(), var_1);
+}
+function ValueWith(bind, var_1){
+  const p=bind(var_1);
+  return AppendTree(Attr.A3(p[0]), DynamicCustom(p[1], p[2]));
+}
+function DynamicCustom(set_1, view){
+  return Dynamic_1(view, set_1);
+}
 class Attr {
   static Create(name, value){
     return Attr.A3((el) => {
@@ -955,11 +975,11 @@ class Attr {
     const x=ofSeqNonCopying(xs);
     return TreeReduce(EmptyAttr(), (_1, _2) => AppendTree(_1, _2), x);
   }
-  static A3(init_2){
-    return Create_1(Attr, {$:3, $0:init_2});
-  }
   static A1(Item){
     return Create_1(Attr, {$:1, $0:Item});
+  }
+  static A3(init_2){
+    return Create_1(Attr, {$:3, $0:init_2});
   }
   static A2(Item1, Item2){
     return Create_1(Attr, {
@@ -971,19 +991,6 @@ class Attr {
   $;
   $0;
   $1;
-}
-function Dynamic(name, view){
-  return Dynamic_1(view, (el) =>(v) => el.setAttribute(name, v));
-}
-function Value(var_1){
-  return ValueWith(StringApply(), var_1);
-}
-function ValueWith(bind, var_1){
-  const p=bind(var_1);
-  return AppendTree(Attr.A3(p[0]), DynamicCustom(p[1], p[2]));
-}
-function DynamicCustom(set_1, view){
-  return Dynamic_1(view, set_1);
 }
 function Int(){
   set_counter(counter()+1);
@@ -1839,6 +1846,40 @@ class HashSet extends Object_1 {
   }
 }
 class Exception extends Object_1 { }
+class DynamicAttrNode extends Object_1 {
+  push;
+  value;
+  dirty;
+  updates;
+  get NChanged(){
+    return this.updates;
+  }
+  NGetExitAnim(parent){
+    return get_Empty();
+  }
+  NGetEnterAnim(parent){
+    return get_Empty();
+  }
+  NGetChangeAnim(parent){
+    return get_Empty();
+  }
+  NSync(parent){
+    if(this.dirty){
+      (this.push(parent))(this.value);
+      this.dirty=false;
+    }
+  }
+  constructor(view, push){
+    super();
+    this.push=push;
+    this.value=void 0;
+    this.dirty=false;
+    this.updates=Map_1((x) => {
+      this.value=x;
+      this.dirty=true;
+    }, view);
+  }
+}
 function StringApply(){
   return _c_3.StringApply;
 }
@@ -1930,40 +1971,6 @@ function FloatSetChecked(){
 }
 function FloatGetChecked(){
   return _c_3.FloatGetChecked;
-}
-class DynamicAttrNode extends Object_1 {
-  push;
-  value;
-  dirty;
-  updates;
-  get NChanged(){
-    return this.updates;
-  }
-  NGetExitAnim(parent){
-    return get_Empty();
-  }
-  NGetEnterAnim(parent){
-    return get_Empty();
-  }
-  NGetChangeAnim(parent){
-    return get_Empty();
-  }
-  NSync(parent){
-    if(this.dirty){
-      (this.push(parent))(this.value);
-      this.dirty=false;
-    }
-  }
-  constructor(view, push){
-    super();
-    this.push=push;
-    this.value=void 0;
-    this.dirty=false;
-    this.updates=Map_1((x) => {
-      this.value=x;
-      this.dirty=true;
-    }, view);
-  }
 }
 let _c_2=Lazy((_i) => class $StartupCode_Abbrev {
   static {
