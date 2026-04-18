@@ -26,6 +26,8 @@ module Client =
 
         let menuOpen = Var.Create false
 
+        let sidebarWidth = 200
+
         let spots =
             [1..10]
             |> List.map (fun i -> 
@@ -111,10 +113,20 @@ module Client =
             div [
                 attr.styleDyn (
                     menuOpen.View.Map (fun isOpen ->
-                        if isOpen then
-                            "position:fixed; top:0; left:0; width:200px; height:100%; background:#333; color:white; padding:20px;"
-                        else
-                            "display:none;"
+                        let x =
+                            if isOpen then "0px"
+                            else "-" + string sidebarWidth + "px"
+
+                        "position:fixed;
+                          top:0;
+                          left:{x}
+                          width:{sidebarWidth}px
+                          height:100%
+                          background:#333
+                          color:white;
+                          padding:20px;
+                          transition:left 0.3s ease;
+                          z-index:1500;"
                     )
                 )   
             ] [
@@ -142,6 +154,19 @@ module Client =
                 | Parking -> parkingView
                 | Payment -> paymentView
             )
+        let mainContainer = 
+            div [
+                attr.styleDyn (
+                     menuOpen.View.Map (fun isOpen ->
+                        if isOpen then
+                            $"margin-left:{sidebarWidth}px; transition:margin-left 0.3s ease;"
+                        else
+                            "margin-left:0px; transition:margin-left 0.3s ease;"
+                    )
+                )
+            ] [
+                Doc.BindView id mainView
+            ]
         div [] [
             hamburger
             sidebar
