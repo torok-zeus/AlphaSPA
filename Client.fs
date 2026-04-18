@@ -24,6 +24,8 @@ module Client =
         let currentPage = Var.Create Parking
         let plateVar = Var.Create ""
 
+        let menuOpen = Var.Create false
+
         let spots =
             [1..10]
             |> List.map (fun i -> 
@@ -97,19 +99,52 @@ module Client =
 
                 div [] (spots |> List.map renderSpot)
             ]
-
-        let menu =
-            div [attr.style "margin-bottom:20px;"] [
-                button [on.click (fun _ _ -> currentPage.Value <- Parking)] [text "Parking"]
-                button [on.click (fun _ _ -> currentPage.Value <- Payment)] [text "Payment"]
+        let hamburger =
+            button[
+                attr.style "position:fixed; top:10px; left:10px; z-index:1000; font-size:20px;"
+                on.click (fun _ _ -> menuOpen.Value <- not menuOpen.Value)
+            ] [
+                text "///"
             ]
+
+        let sidebar =
+            div [
+                attr.styleDyn (
+                    menuOpen.View.Map (fun isOpen ->
+                        if isOpen then
+                            "position:fixed; top:0; left:0; width:200px; height:100%; background:#333; color:white; padding:20px;"
+                        else
+                            "display:none;"
+                    )
+                )   
+            ] [
+                h4 [] [ text "Menu"]
+
+                button [
+                    attr.style "display:block; margin:10px 0;"
+                    on.click (fun _ _ ->
+                        currentPage.Value <- Parking
+                        menuOpen.Value <- false
+                    )
+                ] [ text "Parking"]
+
+                button [
+                    attr.style "display:block; margin:10px 0;"
+                    on.click (fun _ _ ->
+                        currentPage.Value <- Payment
+                        menuOpen.Value <- false
+                    )
+                ] [text "Payment"]
+            ]
+
         let mainView =
             currentPage.View.Map (function
                 | Parking -> parkingView
                 | Payment -> paymentView
             )
         div [] [
-            menu
+            hamburger
+            sidebar
             Doc.BindView id mainView
         ]
         |> Doc.RunById "main"
