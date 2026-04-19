@@ -10,17 +10,36 @@ function Main(){
   const menuOpen=_c.Create_1(false);
   const selectedSpot=_c.Create_1(null);
   const now=_c.Create_1(Date.now());
+  setInterval(() => {
+    now.Set(Date.now());
+  }, 1000);
   const spots=map_1((i) =>["A"+String(i), _c.Create_1(null)], ofSeq(range(1, 10)));
-  const paymentView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Payment")]), Doc.Element("div", [], map_1((_2) => {
-    const name=_2[0];
-    return Doc.Element("div", [], [Doc.TextView(Map2((_3, _4) => {
-      if(_3==null)return name+" - empty";
-      else {
-        const s=_3.$0;
-        return name+"-"+s.Plate+"-"+String(toInt((_4-s.StartTime)/1E3))+" FT";
-      }
-    }, _2[1].View, now.View))]);
-  }, spots))]);
+  const searchPlate=_c.Create_1("");
+  const foundSpot=Map((plate) => {
+    const plate_1=Trim(plate).toUpperCase();
+    return tryFind((_2) => {
+      const m=_2[1].Get();
+      return m!=null&&m.$==1&&(m.$0.Plate.toUpperCase()==plate_1&&(m.$0,true));
+    }, spots);
+  }, searchPlate.View);
+  const paymentView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Payment")]), Doc.Element("div", [], [Doc.Input([Attr.Create("placeholder", "Plate")], searchPlate)]), Doc.Element("div", [], [Doc.BindView((found) => {
+    if(found==null)return Doc.Element("div", [], [Doc.TextNode("No such car")]);
+    else {
+      const spotVar=found.$0[1];
+      const name=found.$0[0];
+      return Doc.BindView((spot) => {
+        if(spot==null)return Doc.Element("div", [], [Doc.TextNode("Empty")]);
+        else {
+          const s=spot.$0;
+          const priceView=Map((nowTime) => toInt((nowTime-s.StartTime)/1E3), now.View);
+          return Doc.Element("div", [], [Doc.Element("div", [], [Doc.TextNode(name+" - "+s.Plate)]), Doc.Element("div", [], [Doc.TextView(Map((p) =>"Price: "+String(p)+" FT", priceView))]), Doc.Element("button", [Attr.Create("style", "margin-top:10px; padding:10px;"), Attr.HandlerImpl("click", () =>() => {
+            spotVar.Set(null);
+            return searchPlate.Set("");
+          })], [Doc.TextNode("Leaving")])]);
+        }
+      }, spotVar.View);
+    }
+  }, foundSpot)])]);
   const parkingView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Parking System")]), Doc.Element("div", [], [Doc.Input([Attr.Create("placeholder", "Plate")], plateVar)]), Doc.Element("div", [], [Doc.TextView(Map((a) => a==null?" Parking space: none selected":"Parking space: "+a.$0, selectedSpot.View))]), Doc.Element("button", [Attr.Create("style", "margin-top:10px; padding:10px;"), Attr.HandlerImpl("click", () =>() => {
     const _2=selectedSpot.Get();
     const _3=plateVar.Get();
@@ -65,12 +84,6 @@ let _c=Lazy((_i) => class Var_1 extends Object_1 {
 });
 let Parking={$:0};
 let Payment={$:1};
-function GetFieldValues(o){
-  let r=[];
-  let k;
-  for(var k_1 in o)r.push(o[k_1]);
-  return r;
-}
 function range(min, max_1){
   const count=1+max_1-min;
   return count<=0?[]:init(count, (x) => x+min);
@@ -88,12 +101,34 @@ function FailWith(msg){
 function KeyValue(kvp){
   return[kvp.K, kvp.V];
 }
+function GetFieldValues(o){
+  let r=[];
+  let k;
+  for(var k_1 in o)r.push(o[k_1]);
+  return r;
+}
 function init(n, f){
   return take(n, initInfinite(f));
 }
 function find(p, s){
   const m=tryFind(p, s);
   return m==null?FailWith("KeyNotFoundException"):m.$0;
+}
+function tryFind(ok, s){
+  const e=Get(s);
+  try {
+    let r=null;
+    while(r==null&&e.MoveNext())
+      {
+        const x=e.Current;
+        if(ok(x))r=Some(x);
+      }
+    return r;
+  }
+  finally {
+    const _1=e;
+    if(typeof _1=="object"&&isIDisposable(_1))e.Dispose();
+  }
 }
 function take(n, s){
   n<0?nonNegative():void 0;
@@ -139,22 +174,6 @@ function append(s1, s2){
       if(!Equals(x_1, null))x_1.Dispose();
     });
   }};
-}
-function tryFind(ok, s){
-  const e=Get(s);
-  try {
-    let r=null;
-    while(r==null&&e.MoveNext())
-      {
-        const x=e.Current;
-        if(ok(x))r=Some(x);
-      }
-    return r;
-  }
-  finally {
-    const _1=e;
-    if(typeof _1=="object"&&isIDisposable(_1))e.Dispose();
-  }
 }
 function head(s){
   const e=Get(s);
@@ -354,9 +373,6 @@ function New(Plate, StartTime){
 function Some(Value_1){
   return{$:1, $0:Value_1};
 }
-function Map2(fn, a, a_1){
-  return CreateLazy(() => Map2_1(fn, a(), a_1()));
-}
 function Map(fn, a){
   return CreateLazy(() => Map_1(fn, a()));
 }
@@ -433,27 +449,6 @@ class ConcreteVar extends Var {
     this.id=Int();
   }
 }
-function Map2_1(fn, sn1, sn2){
-  const _1=sn1.s;
-  const _2=sn2.s;
-  if(_1!=null&&_1.$==0)return _2!=null&&_2.$==0?{s:Forever(fn(_1.$0, _2.$0))}:Map2Opt1(fn, _1.$0, sn2);
-  else if(_2!=null&&_2.$==0)return Map2Opt2(fn, _2.$0, sn1);
-  else {
-    const res={s:Waiting([], [])};
-    const cont=() => {
-      const m=res.s;
-      if(!(m!=null&&m.$==0||m!=null&&m.$==2)){
-        const _3=ValueAndForever(sn1);
-        const _4=ValueAndForever(sn2);
-        if(_3!=null&&_3.$==1)if(_4!=null&&_4.$==1)if(_3.$0[1]&&_4.$0[1])MarkForever(res, fn(_3.$0[0], _4.$0[0]));
-        else MarkReady(res, fn(_3.$0[0], _4.$0[0]));
-      }
-    };
-    When(sn1, cont, res);
-    When(sn2, cont, res);
-    return res;
-  }
-}
 function Map_1(fn, sn){
   const m=sn.s;
   if(m!=null&&m.$==0)return{s:Forever(fn(m.$0))};
@@ -469,35 +464,6 @@ function WhenObsoleteRun(snap, obs){
   const m=snap.s;
   if(m==null)obs();
   else m!=null&&m.$==2?(m.$0,m.$1.push(obs)):m!=null&&m.$==3?(m.$0,m.$1.push(obs)):m.$0;
-}
-function Map2Opt1(fn, x, sn2){
-  return Map_1((y) => fn(x, y), sn2);
-}
-function Map2Opt2(fn, y, sn1){
-  return Map_1((x) => fn(x, y), sn1);
-}
-function ValueAndForever(snap){
-  const m=snap.s;
-  return m!=null&&m.$==0?Some([m.$0, true]):m!=null&&m.$==2?Some([m.$0, false]):null;
-}
-function MarkForever(sn, v){
-  const m=sn.s;
-  if(m!=null&&m.$==3){
-    const q=m.$0;
-    sn.s=Forever(v);
-    for(let i=0, _1=length(q)-1;i<=_1;i++)(get(q, i))(v);
-  }
-  else void 0;
-}
-function MarkReady(sn, v){
-  const m=sn.s;
-  if(m!=null&&m.$==3){
-    const q2=m.$1;
-    const q1=m.$0;
-    sn.s=Ready(v, q2);
-    for(let i=0, _1=length(q1)-1;i<=_1;i++)(get(q1, i))(v);
-  }
-  else void 0;
 }
 function When(snap, avail, obs){
   const m=snap.s;
@@ -533,6 +499,25 @@ function EnqueueSafe(q, x){
         q.push(f);
       })(o));
     }
+  }
+  else void 0;
+}
+function MarkForever(sn, v){
+  const m=sn.s;
+  if(m!=null&&m.$==3){
+    const q=m.$0;
+    sn.s=Forever(v);
+    for(let i=0, _1=length(q)-1;i<=_1;i++)(get(q, i))(v);
+  }
+  else void 0;
+}
+function MarkReady(sn, v){
+  const m=sn.s;
+  if(m!=null&&m.$==3){
+    const q2=m.$1;
+    const q1=m.$0;
+    sn.s=Ready(v, q2);
+    for(let i=0, _1=length(q1)-1;i<=_1;i++)(get(q1, i))(v);
   }
   else void 0;
 }
@@ -611,6 +596,10 @@ function WhenObsolete(snap, obs){
   const m=snap.s;
   if(m==null)Obsolete(obs);
   else m!=null&&m.$==2?(m.$0,EnqueueSafe(m.$1, obs)):m!=null&&m.$==3?(m.$0,EnqueueSafe(m.$1, obs)):m.$0;
+}
+function ValueAndForever(snap){
+  const m=snap.s;
+  return m!=null&&m.$==0?Some([m.$0, true]):m!=null&&m.$==2?Some([m.$0, false]):null;
 }
 function NewFromSeq(fields){
   const r={};
@@ -1054,6 +1043,33 @@ function ValueWith(bind, var_1){
 function DynamicCustom(set_1, view){
   return Dynamic_1(view, set_1);
 }
+function Trim(s){
+  return s.replace(new RegExp("^\\s+"), "").replace(new RegExp("\\s+$"), "");
+}
+function concat_1(separator, strings){
+  return ofSeq_1(strings).join(separator);
+}
+function SplitChars(s, sep, opts){
+  return Split(s, new RegExp("["+RegexEscape(sep.join(""))+"]"), opts);
+}
+function StartsWith(t, s){
+  return t.substring(0, s.length)==s;
+}
+function Split(s, pat, opts){
+  return opts===1?filter((x) => x!=="", SplitWith(s, pat)):SplitWith(s, pat);
+}
+function RegexEscape(s){
+  return s.replace(new RegExp("[-\\/\\\\^$*+?.()|[\\]{}]", "g"), "\\$&");
+}
+function forall_1(f, s){
+  return forall(f, protect(s));
+}
+function SplitWith(str, pat){
+  return str.split(pat);
+}
+function protect(s){
+  return s==null?"":s;
+}
 function Int(){
   set_counter(counter()+1);
   return counter();
@@ -1171,7 +1187,7 @@ class Dictionary extends Object_1 {
     return this.get(k);
   }
   GetEnumerator(){
-    return Get0(concat_1(GetFieldValues(this.data)));
+    return Get0(concat_2(GetFieldValues(this.data)));
   }
   get(k){
     const d=this.data[this.hash(k)];
@@ -2172,7 +2188,7 @@ function foldBack(f, arr, zero){
   for(let i=1, _1=len;i<=_1;i++)acc=f(arr[len-i], acc);
   return acc;
 }
-function concat_1(xs){
+function concat_2(xs){
   return Array.prototype.concat.apply([], ofSeq_1(xs));
 }
 function pick(f, arr){
@@ -2217,7 +2233,7 @@ function init_1(size, f){
   for(let i=0, _1=size-1;i<=_1;i++)r[i]=f(i);
   return r;
 }
-function forall_1(f, x){
+function forall_2(f, x){
   let a=true;
   let i=0;
   const l=length(x);
@@ -2269,7 +2285,7 @@ function removeHolesExcept(instance, dontRemove){
     if(!dontRemove.Contains(e.getAttribute("ws-replace")))e.parentNode.removeChild(e);
   });
   foreachNotPreserved(instance, "[ws-on]", (e) => {
-    e.setAttribute("ws-on", concat_2(" ", filter((x) => dontRemove.Contains(get(SplitChars(x, [":"], 1), 1)), SplitChars(e.getAttribute("ws-on"), [" "], 1))));
+    e.setAttribute("ws-on", concat_1(" ", filter((x) => dontRemove.Contains(get(SplitChars(x, [":"], 1), 1)), SplitChars(e.getAttribute("ws-on"), [" "], 1))));
   });
   foreachNotPreserved(instance, "[ws-attr-holes]", (e) => {
     const holeAttrs=SplitChars(e.getAttribute("ws-attr-holes"), [" "], 1);
@@ -2311,7 +2327,7 @@ function mapHoles(t, mappings){
   run("ws-onafterrender");
   run("ws-var");
   foreachNotPreserved(t, "[ws-on]", (e) => {
-    e.setAttribute("ws-on", concat_2(" ", map_2((x) => {
+    e.setAttribute("ws-on", concat_1(" ", map_2((x) => {
       let o;
       const a=SplitChars(x, [":"], 1);
       const m=(o=null,[mappings.TryGetValue(get(a, 1), {get:() => o, set:(v) => {
@@ -2357,8 +2373,8 @@ function convertAttrs(el){
     }
     else void 0;
   }
-  if(!(events.length==0))el.setAttribute("ws-on", concat_2(" ", events));
-  if(!(holedAttrs.length==0))el.setAttribute("ws-attr-holes", concat_2(" ", holedAttrs));
+  if(!(events.length==0))el.setAttribute("ws-on", concat_1(" ", events));
+  if(!(holedAttrs.length==0))el.setAttribute("ws-attr-holes", concat_1(" ", holedAttrs));
   const lowercaseAttr=(name) => {
     const m=el.getAttribute(name);
     if(m==null){ }
@@ -2659,30 +2675,6 @@ class Updates_1 {
     });
   }
 }
-function concat_2(separator, strings){
-  return ofSeq_1(strings).join(separator);
-}
-function SplitChars(s, sep, opts){
-  return Split(s, new RegExp("["+RegexEscape(sep.join(""))+"]"), opts);
-}
-function StartsWith(t, s){
-  return t.substring(0, s.length)==s;
-}
-function Split(s, pat, opts){
-  return opts===1?filter((x) => x!=="", SplitWith(s, pat)):SplitWith(s, pat);
-}
-function RegexEscape(s){
-  return s.replace(new RegExp("[-\\/\\\\^$*+?.()|[\\]{}]", "g"), "\\$&");
-}
-function forall_2(f, s){
-  return forall(f, protect(s));
-}
-function SplitWith(str, pat){
-  return str.split(pat);
-}
-function protect(s){
-  return s==null?"":s;
-}
 function New_1(DynElem, DynFlags, DynNodes, OnAfterRender){
   const _1={
     DynElem:DynElem, 
@@ -2899,7 +2891,7 @@ let _c_4=Lazy((_i) => class Proxy {
   }
 });
 function isBlank(s){
-  return forall_2(IsWhiteSpace, s);
+  return forall_1(IsWhiteSpace, s);
 }
 class CheckedInput {
   get Input(){
@@ -3151,7 +3143,7 @@ function Children(elem, delims){
 }
 function Except_2(a, a_1){
   const excluded=a.$0;
-  return DomNodes(filter((n) => forall_1((k) =>!(n===k), excluded), a_1.$0));
+  return DomNodes(filter((n) => forall_2((k) =>!(n===k), excluded), a_1.$0));
 }
 function Iter(f, a){
   iter_1(f, a.$0);

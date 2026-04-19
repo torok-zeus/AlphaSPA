@@ -35,7 +35,7 @@ module Client =
         let tick () =
             now.Value <- System.DateTime.Now
 
-        JS.SetInterval tick, 1000 |> ignore
+        JS.SetInterval tick 1000 |> ignore
 
         let spots =
             [1..10]
@@ -69,31 +69,73 @@ module Client =
             ] [
                 textView label
             ]
-        let clacPrice (start: System.DateTime) =
-            let seconds = (System.DateTime.Now - start).TotalSeconds
-            int seconds
+        let searchPlate = Var.Create ""
+        
+        let foundSpot =
+            View.Map (fun (plate: string) ->
+                let plate = plate.Trim().ToUpper()
+
+                spots
+                |> List.tryFind (fun (_, v) ->
+                    match v.Value with
+                    | Some s when s.Plate.ToUpper() = plate -> true
+                    | _ -> false
+                )
+            ) searchPlate.View
 
         let paymentView =
             div [] [
                 h3 [] [text "Payment"]
-                div [] (
-                    spots
-                    |> List.map (fun (name, spotVar) ->
-                        div [] [
-                            textView (
-                                View.Map2 (fun spot nowTime ->
-                                    match spot with
-                                    | Some s ->
-                                        let price = int ((nowTime - s.StartTime).TotalSeconds)
-                                        name + "-" + s.Plate + "-" + string price + " FT"
-                                    | None ->
-                                        name + " - empty"                      
-                                ) spotVar.View now.View
-                               
-                            )
-                        ]
-                    )
-                )
+
+                div [] [
+                    Doc.InputType.Text [attr.placeholder "Plate"] searchPlate
+                ]
+
+                div [] [
+                   Doc.BindView (fun found ->
+                        match found with
+                        | Some (name, (spotVar: Var<Option<Spot>>)) ->
+                           
+                            Doc.BindView (fun (spot: Option<Spot>) ->
+                               match spot with
+                               | Some s ->
+                                   let priceView =
+                                       now.View.Map (fun nowTime ->
+                                           int ((nowTime - s.StartTime).TotalSeconds)
+                                       )
+
+                                   div [] [
+                                       div [] [
+                                           text (name + " - " + s.Plate)
+                                       ]
+                                       div [] [
+                                           textView (
+                                               priceView.Map (fun p ->
+                                                   "Price: " + string p + " FT"
+                                               )
+                                           )
+                                       ]
+
+                                       button [
+                                           attr.style "margin-top:10px; padding:10px;"
+                                           on.click ( fun _ _ ->
+                                               spotVar.Value <- None
+                                               searchPlate.Value <- ""
+                                           )
+                                       ] [
+                                           text "Leaving"
+                                       ]
+                                    ]
+                                | None ->
+                                    div [] [ text "Empty"]
+                       
+                            ) spotVar.View
+                      
+                        | None ->
+                            div [] [ text "No such car"]
+                    ) foundSpot
+      
+                ]
             ]
         let parkingView =
             div [] [
