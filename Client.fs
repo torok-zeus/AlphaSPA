@@ -126,7 +126,13 @@ module Client =
                 button [
                     attr.style "font-size:20px; background:none; border:none; color:white; cursor:pointer;"
                     on.click (fun _ _ -> menuOpen.Value <- not menuOpen.Value)
-                ] [ text "///"]
+                ] [ 
+                    textView (
+                        menuOpen.View.Map ( fun isOpen ->
+                            if isOpen then "///" else "|||"
+                        )
+                    )
+                ]
                 div [attr.style "margin:10px"] [
                     text "Parking App"
                 ]
@@ -171,6 +177,5 @@ module Client =
         div [] [
             topBar
             layout
-            Doc.BindView id mainView
         ]
         |> Doc.RunById "main"
