@@ -28,6 +28,15 @@ module Client =
 
         let sidebarWidth = 200
 
+        let selectedSpot = Var.Create<Option<string>>(None)
+
+        let now = Var.Create(System.DateTime.Now)
+
+        let tick () =
+            now.Value <- System.DateTime.Now
+
+        JS.SetInterval tick, 1000 |> ignore
+
         let spots =
             [1..10]
             |> List.map (fun i -> 
@@ -54,22 +63,15 @@ module Client =
                     )
                 )
                 on.click (fun _ _ ->
-                    match spotVar.Value, plateVar.Value with
-                    | None, plate when plate <> "" ->
-                        spotVar.Value <- Some{
-                            Plate = plate
-                            StartTime = System.DateTime.Now
-                        }
-                        plateVar.Value <- ""
-                    | _ -> ()
+                    selectedSpot.Value <- Some name
                 )
                 
             ] [
                 textView label
             ]
         let clacPrice (start: System.DateTime) =
-            let minutes = (System.DateTime.Now - start).TotalMinutes
-            int minutes * 100
+            let seconds = (System.DateTime.Now - start).TotalSeconds
+            int seconds
 
         let paymentView =
             div [] [
@@ -79,13 +81,15 @@ module Client =
                     |> List.map (fun (name, spotVar) ->
                         div [] [
                             textView (
-                                spotVar.View.Map (function
+                                View.Map2 (fun spot nowTime ->
+                                    match spot with
                                     | Some s ->
-                                        let price = clacPrice s.StartTime
+                                        let price = int ((nowTime - s.StartTime).TotalSeconds)
                                         name + "-" + s.Plate + "-" + string price + " FT"
                                     | None ->
-                                        name + " - empty"
-                                )
+                                        name + " - empty"                      
+                                ) spotVar.View now.View
+                               
                             )
                         ]
                     )
@@ -99,6 +103,38 @@ module Client =
                     Doc.InputType.Text [attr.placeholder "Plate"] plateVar
                 ]
 
+                div [] [
+                    textView (
+                        selectedSpot.View.Map (function
+                            | Some s -> "Parking space: " + s
+                            | None -> " Parking space: none selected"
+                        )
+                    )
+                ]
+
+                button [
+                    attr.style "margin-top:10px; padding:10px;"
+                    on.click (fun _ _ ->
+                        match selectedSpot.Value, plateVar.Value with
+                        | Some name, plate when plate <> "" ->
+
+                            let spotVar =
+                                spots
+                                |> List.find (fun (n, _) -> n = name)
+                                |> snd
+
+                            match spotVar.Value with
+                            | None ->
+                                spotVar.Value <- Some {
+                                    Plate = plate
+                                    StartTime = System.DateTime.Now
+                                }
+                                plateVar.Value <- ""
+                                selectedSpot.Value <- None
+                            | _ -> ()
+                        | _ -> ()
+                    )
+                ] [ text "Park"]
                 div [] (spots |> List.map renderSpot)
             ]
 
