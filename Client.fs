@@ -63,7 +63,9 @@ module Client =
                     )
                 )
                 on.click (fun _ _ ->
-                    selectedSpot.Value <- Some name
+                    match spotVar.Value with
+                    | None -> selectedSpot.Value <- Some name
+                    | Some _ -> ()
                 )
                 
             ] [
@@ -141,10 +143,38 @@ module Client =
             div [] [
                 h3 [] [text "Parking System"]
 
-                div [] [
-                    Doc.InputType.Text [attr.placeholder "Plate"] plateVar
-                ]
+                div [
+                    attr.style "display:flex; gap:10px; align-items:center;"
+                ] [
+                    Doc.InputType.Text 
+                        [ attr.placeholder "Plate"
+                          attr.style "padding:8px"]
+                        plateVar
+                
+                    button [
+                        attr.style "padding:10px;"
+                        on.click (fun _ _ ->
+                            match selectedSpot.Value, plateVar.Value with
+                            | Some name, plate when plate <> "" ->
 
+                                let spotVar =
+                                    spots
+                                    |> List.find (fun (n, _) -> n = name)
+                                    |> snd
+
+                                match spotVar.Value with
+                                | None ->
+                                    spotVar.Value <- Some {
+                                        Plate = plate
+                                        StartTime = System.DateTime.Now
+                                    }
+                                    plateVar.Value <- ""
+                                    selectedSpot.Value <- None
+                                | Some _ -> ()
+                            | _ -> ()
+                         )
+                    ] [ text "Park"]
+                ]
                 div [] [
                     textView (
                         selectedSpot.View.Map (function
@@ -153,30 +183,6 @@ module Client =
                         )
                     )
                 ]
-
-                button [
-                    attr.style "margin-top:10px; padding:10px;"
-                    on.click (fun _ _ ->
-                        match selectedSpot.Value, plateVar.Value with
-                        | Some name, plate when plate <> "" ->
-
-                            let spotVar =
-                                spots
-                                |> List.find (fun (n, _) -> n = name)
-                                |> snd
-
-                            match spotVar.Value with
-                            | None ->
-                                spotVar.Value <- Some {
-                                    Plate = plate
-                                    StartTime = System.DateTime.Now
-                                }
-                                plateVar.Value <- ""
-                                selectedSpot.Value <- None
-                            | _ -> ()
-                        | _ -> ()
-                    )
-                ] [ text "Park"]
                 div [] (spots |> List.map renderSpot)
             ]
 
