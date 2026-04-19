@@ -9,6 +9,7 @@ function Main(){
   const plateVar=_c.Create_1("");
   const menuOpen=_c.Create_1(false);
   const selectedSpot=_c.Create_1(null);
+  const paymentMessage=_c.Create_1(null);
   const now=_c.Create_1(Date.now());
   setInterval(() => {
     now.Set(Date.now());
@@ -33,32 +34,43 @@ function Main(){
           const s=spot.$0;
           const priceView=Map((nowTime) => toInt((nowTime-s.StartTime)/1E3), now.View);
           return Doc.Element("div", [], [Doc.Element("div", [], [Doc.TextNode(name+" - "+s.Plate)]), Doc.Element("div", [], [Doc.TextView(Map((p) =>"Price: "+String(p)+" FT", priceView))]), Doc.Element("button", [Attr.Create("style", "margin-top:10px; padding:10px;"), Attr.HandlerImpl("click", () =>() => {
+            paymentMessage.Set(Some("Your car is leaving from"+name+"parking space and "+String(toInt((Date.now()-s.StartTime)/1E3))+"Ft payed"));
             spotVar.Set(null);
             return searchPlate.Set("");
-          })], [Doc.TextNode("Leaving")])]);
+          })], [Doc.TextNode("Pay")])]);
         }
       }, spotVar.View);
     }
-  }, foundSpot)])]);
-  const parkingView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Parking System")]), Doc.Element("div", [], [Doc.Input([Attr.Create("placeholder", "Plate")], plateVar)]), Doc.Element("div", [], [Doc.TextView(Map((a) => a==null?" Parking space: none selected":"Parking space: "+a.$0, selectedSpot.View))]), Doc.Element("button", [Attr.Create("style", "margin-top:10px; padding:10px;"), Attr.HandlerImpl("click", () =>() => {
+  }, foundSpot)]), Doc.BindView((msgOpt) => {
+    if(msgOpt==null)return Doc.Empty;
+    else {
+      const msg=msgOpt.$0;
+      return Doc.Element("div", [Attr.Create("style", "\r\n                                position:fixed;\r\n                                top:50%;\r\n                                left:50%;\r\n                                transform:translate(-50%, -50%);\r\n                                background:white;\r\n                                padding:20px;\r\n                                border:2px solid black;\r\n                                z-index:5000;\r\n                                box-shadow:0 0 10px rgba(0,0,0,0.5);                            \r\n                            ")], [Doc.Element("div", [], [Doc.TextNode(msg)]), Doc.Element("button", [Attr.Create("style", "margin-top:10px; padding:10px"), Attr.HandlerImpl("click", () =>() => paymentMessage.Set(null))], [Doc.TextNode("OK")])]);
+    }
+  }, paymentMessage.View)]);
+  const parkingView=Doc.Element("div", [], [Doc.Element("h3", [], [Doc.TextNode("Parking System")]), Doc.Element("div", [Attr.Create("style", "display:flex; gap:10px; align-items:center;")], [Doc.Input([Attr.Create("placeholder", "Plate"), Attr.Create("style", "padding:8px")], plateVar), Doc.Element("button", [Attr.Create("style", "padding:10px;"), Attr.HandlerImpl("click", () =>() => {
     const _2=selectedSpot.Get();
     const _3=plateVar.Get();
     if(_2!=null&&_2.$==1){
       _2.$0;
       if(_3!=""){
         const name=_2.$0;
-        const spotVar=(find((_4) => _4[0]==name, spots))[1];
-        return spotVar.Get()==null?(spotVar.Set(Some(New(_3, Date.now()))),plateVar.Set(""),selectedSpot.Set(null)):null;
+        const spotVar=(find((_5) => _5[0]==name, spots))[1];
+        const _4=spotVar.Get();
+        return _4!=null&&_4.$==1?null:(spotVar.Set(Some(New(_3, Date.now()))),plateVar.Set(""),selectedSpot.Set(null));
       }
       else return null;
     }
     else return null;
-  })], [Doc.TextNode("Park")]), Doc.Element("div", [], map_1((_2) => {
+  })], [Doc.TextNode("Park")])]), Doc.Element("div", [], [Doc.TextView(Map((a) => a==null?" Parking space: none selected":"Parking space: "+a.$0, selectedSpot.View))]), Doc.Element("div", [], map_1((_2) => {
     const _3=_2[0];
     const spotVar=_2[1];
     const isOccupied=Map((o) => o!=null, spotVar.View);
     const label=Map((a) => a==null?_3:_3+"-"+a.$0.Plate, spotVar.View);
-    return Doc.Element("button", [Dynamic("style", Map((occ) => occ?"margin:5px; padding:15px; background-color:red; color:white; border none;":"margin:5px; padding:15px; background-color:green; color:white; border none;", isOccupied)), Attr.HandlerImpl("click", () =>() => selectedSpot.Set(Some(_3)))], [Doc.TextView(label)]);
+    return Doc.Element("button", [Dynamic("style", Map((occ) => occ?"margin:5px; padding:15px; background-color:red; color:white; border none;":"margin:5px; padding:15px; background-color:green; color:white; border none;", isOccupied)), Attr.HandlerImpl("click", () =>() => {
+      const _4=spotVar.Get();
+      return _4!=null&&_4.$==1?null:selectedSpot.Set(Some(_3));
+    })], [Doc.TextView(label)]);
   }, spots))]);
   const mainView=Map((a) => a.$==1?paymentView:parkingView, currentPage.View);
   const _1=Doc.Element("div", [], [Doc.Element("div", [Attr.Create("style", "\r\n                    position:fixed;\r\n                    top:0;\r\n                    left:0;\r\n                    width:100%;\r\n                    height:50px;\r\n                    background:#222;\r\n                    color:white;\r\n                    display:flex;\r\n                    align-items:center;\r\n                    padding:0 10px;\r\n                    z-index:3000;\r\n                ")], [Doc.Element("button", [Attr.Create("style", "font-size:20px; background:none; border:none; color:white; cursor:pointer;"), Attr.HandlerImpl("click", () =>() => menuOpen.Set(!menuOpen.Get()))], [Doc.TextView(Map((isOpen) => isOpen?"///":"|||", menuOpen.View))]), Doc.Element("div", [Attr.Create("style", "margin:10px")], [Doc.TextNode("Parking App")])]), Doc.Element("div", [Attr.Create("style", "display:flex; margin-top:50px; height:calc(100vh - 50px);")], [Doc.Element("div", [Dynamic("style", Map((isOpen) => isOpen?"width:200px; background:#333; color:white; padding:10px; transition:0.3s;":"width:0px; overflow:hidden; transition:0.3s;", menuOpen.View))], [Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => currentPage.Set(Parking))], [Doc.TextNode("Parking")]), Doc.Element("button", [Attr.Create("style", "display:block; margin:10px 0;"), Attr.HandlerImpl("click", () =>() => currentPage.Set(Payment))], [Doc.TextNode("Payment")])]), Doc.Element("div", [Attr.Create("style", "flex:1; padding:10px;")], [Doc.BindView((x) => x, mainView)])])]);
@@ -373,8 +385,79 @@ function New(Plate, StartTime){
 function Some(Value_1){
   return{$:1, $0:Value_1};
 }
+class Doc extends Object_1 {
+  docNode;
+  updates;
+  static get Empty(){
+    return Doc.Mk(null, Const());
+  }
+  static RunById(id, tr){
+    const m=globalThis.document.getElementById(id);
+    if(Equals(m, null))FailWith("invalid id: "+id);
+    else Doc.Run(m, tr);
+  }
+  static TextNode(v){
+    return Doc.Mk(TextNodeDoc(globalThis.document.createTextNode(v)), Const());
+  }
+  static BindView(f, view){
+    return Doc.EmbedView(Map(f, view));
+  }
+  static Input(attr_1, var_1){
+    return Doc.InputInternal("input", () => append(attr_1, [Value(var_1)]));
+  }
+  static Mk(node, updates){
+    return new Doc(node, updates);
+  }
+  static Element(name, attr_1, children){
+    const a=Attr.Concat(attr_1);
+    const c=Doc.Concat(children);
+    return Elt.New(globalThis.document.createElement(name), a, c);
+  }
+  static Run(parent, doc){
+    LinkElement(parent, doc.docNode);
+    Doc.RunInPlace(false, parent, doc);
+  }
+  static EmbedView(view){
+    const node=CreateEmbedNode();
+    return Doc.Mk(EmbedDoc(node), Map(() => { }, Bind((doc) => {
+      UpdateEmbedNode(node, doc.docNode);
+      return doc.updates;
+    }, view)));
+  }
+  static TextView(txt){
+    const node=CreateTextNode();
+    return Doc.Mk(TextDoc(node), Map((t) => {
+      UpdateTextNode(node, t);
+    }, txt));
+  }
+  static InputInternal(elemTy, attr_1){
+    const el=globalThis.document.createElement(elemTy);
+    return Elt.New(el, Attr.Concat(attr_1(el)), Doc.Empty);
+  }
+  static Concat(xs){
+    return TreeReduce(Doc.Empty, Doc.Append, ofSeqNonCopying(xs));
+  }
+  static RunInPlace(childrenOnly, parent, doc){
+    const st=CreateRunState(parent, doc.docNode);
+    Sink(get_UseAnimations()||BatchUpdatesEnabled()?StartProcessor(PerformAnimatedUpdate(childrenOnly, st, doc.docNode)):() => {
+      PerformSyncUpdate(childrenOnly, st, doc.docNode);
+    }, doc.updates);
+  }
+  static Append(a, b){
+    return Doc.Mk(AppendDoc(a.docNode, b.docNode), Map2Unit(a.updates, b.updates));
+  }
+  constructor(docNode, updates){
+    super();
+    this.docNode=docNode;
+    this.updates=updates;
+  }
+}
 function Map(fn, a){
   return CreateLazy(() => Map_1(fn, a()));
+}
+function Const(x){
+  const o={s:Forever(x)};
+  return() => o;
 }
 function CreateLazy(observe){
   const lv={c:null, o:observe};
@@ -392,10 +475,6 @@ function CreateLazy(observe){
     }
     else return c;
   };
-}
-function Const(x){
-  const o={s:Forever(x)};
-  return() => o;
 }
 function Bind(fn, view){
   return Join(Map(fn, view));
@@ -930,73 +1009,6 @@ function PrepareSingleTemplate(baseName, name, el){
 }
 function TextHoleRE(){
   return _c_1.TextHoleRE;
-}
-class Doc extends Object_1 {
-  docNode;
-  updates;
-  static RunById(id, tr){
-    const m=globalThis.document.getElementById(id);
-    if(Equals(m, null))FailWith("invalid id: "+id);
-    else Doc.Run(m, tr);
-  }
-  static TextNode(v){
-    return Doc.Mk(TextNodeDoc(globalThis.document.createTextNode(v)), Const());
-  }
-  static BindView(f, view){
-    return Doc.EmbedView(Map(f, view));
-  }
-  static Input(attr_1, var_1){
-    return Doc.InputInternal("input", () => append(attr_1, [Value(var_1)]));
-  }
-  static Element(name, attr_1, children){
-    const a=Attr.Concat(attr_1);
-    const c=Doc.Concat(children);
-    return Elt.New(globalThis.document.createElement(name), a, c);
-  }
-  static Run(parent, doc){
-    LinkElement(parent, doc.docNode);
-    Doc.RunInPlace(false, parent, doc);
-  }
-  static Mk(node, updates){
-    return new Doc(node, updates);
-  }
-  static EmbedView(view){
-    const node=CreateEmbedNode();
-    return Doc.Mk(EmbedDoc(node), Map(() => { }, Bind((doc) => {
-      UpdateEmbedNode(node, doc.docNode);
-      return doc.updates;
-    }, view)));
-  }
-  static TextView(txt){
-    const node=CreateTextNode();
-    return Doc.Mk(TextDoc(node), Map((t) => {
-      UpdateTextNode(node, t);
-    }, txt));
-  }
-  static InputInternal(elemTy, attr_1){
-    const el=globalThis.document.createElement(elemTy);
-    return Elt.New(el, Attr.Concat(attr_1(el)), Doc.Empty);
-  }
-  static Concat(xs){
-    return TreeReduce(Doc.Empty, Doc.Append, ofSeqNonCopying(xs));
-  }
-  static RunInPlace(childrenOnly, parent, doc){
-    const st=CreateRunState(parent, doc.docNode);
-    Sink(get_UseAnimations()||BatchUpdatesEnabled()?StartProcessor(PerformAnimatedUpdate(childrenOnly, st, doc.docNode)):() => {
-      PerformSyncUpdate(childrenOnly, st, doc.docNode);
-    }, doc.updates);
-  }
-  static get Empty(){
-    return Doc.Mk(null, Const());
-  }
-  static Append(a, b){
-    return Doc.Mk(AppendDoc(a.docNode, b.docNode), Map2Unit(a.updates, b.updates));
-  }
-  constructor(docNode, updates){
-    super();
-    this.docNode=docNode;
-    this.updates=updates;
-  }
 }
 class Attr {
   static Create(name, value){
@@ -2044,6 +2056,30 @@ function FloatSetChecked(){
 function FloatGetChecked(){
   return _c_3.FloatGetChecked;
 }
+class DocElemNode {
+  Attr;
+  Children;
+  Delimiters;
+  El;
+  ElKey;
+  Render;
+  Equals(o){
+    return this.ElKey===o.ElKey;
+  }
+  GetHashCode(){
+    return this.ElKey;
+  }
+  static New(Attr_1, Children_1, Delimiters, El, ElKey, Render){
+    const _1={
+      Attr:Attr_1, 
+      Children:Children_1, 
+      El:El, 
+      ElKey:ElKey
+    };
+    let _2=(SetOptional(_1, "Delimiters", Delimiters),SetOptional(_1, "Render", Render),_1);
+    return Create_1(DocElemNode, _2);
+  }
+}
 let _c_2=Lazy((_i) => class $StartupCode_Abbrev {
   static {
     _c_2=_i(this);
@@ -2414,30 +2450,6 @@ class KeyCollection extends Object_1 {
     this.d=d;
   }
 }
-class DocElemNode {
-  Attr;
-  Children;
-  Delimiters;
-  El;
-  ElKey;
-  Render;
-  Equals(o){
-    return this.ElKey===o.ElKey;
-  }
-  GetHashCode(){
-    return this.ElKey;
-  }
-  static New(Attr_1, Children_1, Delimiters, El, ElKey, Render){
-    const _1={
-      Attr:Attr_1, 
-      Children:Children_1, 
-      El:El, 
-      ElKey:ElKey
-    };
-    let _2=(SetOptional(_1, "Delimiters", Delimiters),SetOptional(_1, "Render", Render),_1);
-    return Create_1(DocElemNode, _2);
-  }
-}
 function get_UseAnimations(){
   return UseAnimations();
 }
@@ -2651,6 +2663,15 @@ let _c_3=Lazy((_i) => class Client {
     this.FloatApplyChecked=(v) => ApplyValue(g_7, s_7, v);
   }
 });
+function New_1(DynElem, DynFlags, DynNodes, OnAfterRender){
+  const _1={
+    DynElem:DynElem, 
+    DynFlags:DynFlags, 
+    DynNodes:DynNodes
+  };
+  SetOptional(_1, "OnAfterRender", OnAfterRender);
+  return _1;
+}
 class Updates_1 {
   c;
   s;
@@ -2674,15 +2695,6 @@ class Updates_1 {
       v:VarView
     });
   }
-}
-function New_1(DynElem, DynFlags, DynNodes, OnAfterRender){
-  const _1={
-    DynElem:DynElem, 
-    DynFlags:DynFlags, 
-    DynNodes:DynNodes
-  };
-  SetOptional(_1, "OnAfterRender", OnAfterRender);
-  return _1;
 }
 function New_2(PreviousNodes, Top){
   return{PreviousNodes:PreviousNodes, Top:Top};

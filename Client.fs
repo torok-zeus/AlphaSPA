@@ -30,6 +30,8 @@ module Client =
 
         let selectedSpot = Var.Create<Option<string>>(None)
 
+        let paymentMessage = Var.Create<Option<string>>(None)
+
         let now = Var.Create(System.DateTime.Now)
 
         let tick () =
@@ -121,11 +123,18 @@ module Client =
                                        button [
                                            attr.style "margin-top:10px; padding:10px;"
                                            on.click ( fun _ _ ->
+                                               let price = int ((System.DateTime.Now - s.StartTime).TotalSeconds)
+
+                                               paymentMessage.Value <- Some (
+                                                   "Your car is leaving from" + name +
+                                                   "parking space and " + 
+                                                   string price + "Ft payed"
+                                               )
                                                spotVar.Value <- None
                                                searchPlate.Value <- ""
                                            )
                                        ] [
-                                           text "Leaving"
+                                           text "Pay"
                                        ]
                                     ]
                                 | None ->
@@ -138,6 +147,36 @@ module Client =
                     ) foundSpot
       
                 ]
+                Doc.BindView (fun msgOpt ->
+                    match msgOpt with
+                    | Some msg ->
+                        div [
+                            attr.style "
+                                position:fixed;
+                                top:50%;
+                                left:50%;
+                                transform:translate(-50%, -50%);
+                                background:white;
+                                padding:20px;
+                                border:2px solid black;
+                                z-index:5000;
+                                box-shadow:0 0 10px rgba(0,0,0,0.5);                            
+                            "
+                        
+                        ] [
+                            div [] [text msg]
+
+                            button [
+                                attr.style "margin-top:10px; padding:10px"
+                                on.click (fun _ _ ->
+                                    paymentMessage.Value <- None
+                                )
+                            ] [
+                                text "OK"
+                            ]
+                        ]
+                    | None -> Doc.Empty
+                )paymentMessage.View
             ]
         let parkingView =
             div [] [
