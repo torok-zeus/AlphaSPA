@@ -59,9 +59,9 @@ module Client =
                 attr.styleDyn(
                     isOccupied.Map (fun occ ->
                         if occ then
-                            "margin:5px; padding:15px; background-color:red; color:white; border none;"
+                            "margin:5px; padding:15px; background-color:red; color:white; border:none;"
                         else
-                            "margin:5px; padding:15px; background-color:green; color:white; border none;"
+                            "margin:5px; padding:15px; background-color:green; color:white; border:none;"
                     )
                 )
                 on.click (fun _ _ ->
@@ -307,6 +307,7 @@ module Client =
                             | Parking -> el?style?background <- "#008CFF"
                             | _ -> el?style?background <- "#444"
                         )
+                        on.click (fun _ _ -> currentPage.Value <- Payment)
                     ] [
                       text "Payment"
                     ]
