@@ -54,7 +54,7 @@ https://torok-zeus.github.io/AlphaSPA/
 Build & Run
 
 Prerequisites:
-- .NET SDK (6 or later)
+- .NET SDK (8 or later)
 
 Clone repository:
 git clone https://github.com/torok-zeus/AlphaSPA.git
