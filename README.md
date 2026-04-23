@@ -42,7 +42,7 @@ The aim was to build a realistic small-scale system that demonstrates how functi
 
 ---
 
-## 📸 Screenshots
+ Screenshots
 
 Parking view:
 screenshots/parking.png
