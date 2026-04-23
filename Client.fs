@@ -33,6 +33,7 @@ module Client =
         let paymentMessage = Var.Create<Option<string>>(None)
 
         let now = Var.Create(System.DateTime.Now)
+        let isHovered = Var.Create
 
         let tick () =
             now.Value <- System.DateTime.Now
@@ -283,12 +284,6 @@ module Client =
                                     "display:block; width:100%; padding:12px; margin:6px 0; background:#444; color:white; border:none; border-radius:8px; text-align:left;"
                             )
                         )
-                        on.mouseEnter (fun el _ -> el?style?background <- "#555")
-                        on.mouseLeave (fun el _ -> 
-                            match currentPage.Value with
-                            | Parking -> el?style?background <- "#008CFF"
-                            | _ -> el?style?background <- "#444"
-                        )
                         on.click (fun _ _ -> currentPage.Value <- Parking)
                     ] [ text "Parking"]
                     
@@ -301,15 +296,9 @@ module Client =
                                     "display:block; width:100%; padding:12px; margin:6px 0; background:#444; color:white; border:none; border-radius:8px; text-align:left;"
                             )
                         )
-                        on.mouseEnter (fun el _ -> el?style?background <- "#555")
-                        on.mouseLeave (fun el _ -> 
-                            match currentPage.Value with
-                            | Parking -> el?style?background <- "#008CFF"
-                            | _ -> el?style?background <- "#444"
-                        )
                         on.click (fun _ _ -> currentPage.Value <- Payment)
                     ] [
-                      text "Payment"
+                         text "Payment"
                     ]
                  
                 ]
