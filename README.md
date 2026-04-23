@@ -13,7 +13,6 @@ It simulates a real-world parking system where users can:
 
 The application is fully client-side and runs as a Single Page Application (SPA).
 
----
 
  Motivation
 
@@ -25,8 +24,6 @@ The goal of this project was to practice:
 - state management using reactive variables (`Var` / `View`)
 
 The aim was to build a realistic small-scale system that demonstrates how functional programming can be used for interactive web applications.
-
----
 
  Features
 
@@ -40,8 +37,6 @@ The aim was to build a realistic small-scale system that demonstrates how functi
 - Sidebar navigation (Parking / Payment pages)
 - Fully reactive UI updates
 
----
-
  Screenshots
 
 Parking view:
@@ -50,14 +45,9 @@ screenshots/parking.png
 Payment view:
 screenshots/payment.png
 
-
----
-
 Live Demo
 
 https://torok-zeus.github.io/AlphaSPA/
-
----
 
 Build & Run
 
@@ -76,8 +66,6 @@ This is a client-side SPA deployed via GitHub Pages.
 
 Open:
 https://torok-zeus.github.io/AlphaSPA/
-
----
 
  Notes
 
