@@ -126,8 +126,8 @@ module Client =
                                                let price = int ((System.DateTime.Now - s.StartTime).TotalSeconds)
 
                                                paymentMessage.Value <- Some (
-                                                   "Your car is leaving from" + name +
-                                                   "parking space and " + 
+                                                   "Your car is leaving from " + name +
+                                                   " parking space and " + 
                                                    string price + "Ft payed"
                                                )
                                                spotVar.Value <- None
@@ -275,18 +275,41 @@ module Client =
                     )
                 ] [
                     button [
-                        attr.style "display:block; margin:10px 0;"
-                        on.click (fun _ _ ->
-                            currentPage.Value <- Parking
+                        attr.styleDyn (
+                            currentPage.View.Map (fun p ->
+                                if p = Parking then
+                                    "display:block; width:100%; padding:12px; margin:6px 0; background:#008CFF; color:white; border:none; border-radius:8px; text-align:left;"
+                                else
+                                    "display:block; width:100%; padding:12px; margin:6px 0; background:#444; color:white; border:none; border-radius:8px; text-align:left;"
+                            )
                         )
+                        on.mouseEnter (fun el _ -> el?style?background <- "#555")
+                        on.mouseLeave (fun el _ -> 
+                            match currentPage.Value with
+                            | Parking -> el?style?background <- "#008CFF"
+                            | _ -> el?style?background <- "#444"
+                        )
+                        on.click (fun _ _ -> currentPage.Value <- Parking)
                     ] [ text "Parking"]
                     
                     button [
-                        attr.style "display:block; margin:10px 0;"
-                        on.click (fun _ _ ->
-                            currentPage.Value <- Payment
+                        attr.styleDyn (
+                            currentPage.View.Map (fun p ->
+                                if p = Payment then
+                                    "display:block; width:100%; padding:12px; margin:6px 0; background:#008CFF; color:white; border:none; border-radius:8px; text-align:left;"
+                                else
+                                    "display:block; width:100%; padding:12px; margin:6px 0; background:#444; color:white; border:none; border-radius:8px; text-align:left;"
+                            )
                         )
-                    ] [ text "Payment"]
+                        on.mouseEnter (fun el _ -> el?style?background <- "#555")
+                        on.mouseLeave (fun el _ -> 
+                            match currentPage.Value with
+                            | Parking -> el?style?background <- "#008CFF"
+                            | _ -> el?style?background <- "#444"
+                        )
+                    ] [
+                      text "Payment"
+                    ]
                  
                 ]
                 div [
