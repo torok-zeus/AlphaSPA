@@ -16,7 +16,9 @@ The application is fully client-side and runs as a Single Page Application (SPA)
 
  Motivation
 
-The goal of this project was to practice:
+My personal motivation was that it came from the fact that I already had this idea in another subject that I wanted to implement in Python and I was interested in seeing if it would be possible to implement it in F#.
+
+In addition, this project provided an opportunity to practice:
 
 - functional programming in F#
 - reactive UI development using WebSharper
